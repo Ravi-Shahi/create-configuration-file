@@ -1,0 +1,27 @@
+---
+- name: Create a xyz config file
+  hosts: localhost
+  vars:
+    raw_input: 'data1;data2;data3;data4;data5;|set1;set2;set3;set4;set5;set6|;;info3;info4;;;'
+    job_id: 000
+  tasks:
+  # skips the wrong input
+  - name: check valid data
+    set_fact:
+      file_content: "{{ file_content }}{{ item }}{{ '\n' }}"
+    loop: "{{ (raw_input|string).split('|') }}"
+    vars:
+      file_content: "# XYZ config file: {{ job_id }} \n"
+      temp: "{{ item.split(';') }}"
+  # checks for mandatory variable
+    when:
+    -  temp|length == 6
+    -  temp[0]|length > 0 
+    -  temp[5]|length > 0 
+
+  - name: create xyz config file
+    copy:
+      content: "{{ file_content }}"
+      dest: "./xyz.cfg"
+
+      
